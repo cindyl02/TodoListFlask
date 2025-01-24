@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style type="text/css">
+    body { font-size: 20px; }
+    .inline {
+        display: inline-block;
+        margin: 5px; /* Optional: add some margin for spacing */
+    }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const form = document.querySelector('form');
+            form.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    form.submit();
+                }
+            });
+            // Select all delete buttons in the list
+            const deleteButtons = document.querySelectorAll('.inline');
+
+            // Loop through each element using forEach and add event listener
+            deleteButtons.forEach((item) => {
+                item.addEventListener('click', function() {
+                    // Get the URL from the data attribute
+                    const url = this.getAttribute('data-url');
+                    // Redirect to the URL
+                    window.location.href = url;
+                });
+
+            });
+
+            // Get all set date buttons in the list
+            const setDateButtons = document.querySelectorAll('#task-list li .setDateButton');
+
+            // Loop through each element using forEach and add event listener
+            setDateButtons.forEach((item, index) => {
+                item.addEventListener('click', function() {
+                    count = index + 1
+                    datePickerId = "datePicker" + count
+                    const datePicker = document.getElementById(datePickerId);
+                    const dateValue = datePicker.value;
+                    if (dateValue) {
+                        // Get the URL from the data attribute
+                        const url = this.getAttribute('data-url') + "?date=" + dateValue;
+                        // Redirect to the URL
+                        window.location.href = url;
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>{{title}}</h1>
+    <form action="/submit" method="post">
+        <input type="text" id="new-task" name="new-task" placeholder="Write your next task here..." required>
+        <br><br>
+        <ul id="task-list">
+            {% for item in todos.keys() %}
+            <li>{{ item }}
+                <button class="inline" id="{{loop.index}}" data-url="{{ url_for('delete', item=item) }}">Delete</button>
+                <p>Select a Due Date</p>
+                <input type="date" id="datePicker{{loop.index}}">
+                <button class="setDateButton" id="setDateBtn{{loop.index}}" data-url="{{ url_for('setdate', item=item) }}">Set Due Date</button>
+                <p id="selectedDate{{loop.index}}">{{todos[item]}}</p>
+            </li>
+            {% endfor %}
+        </ul>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
