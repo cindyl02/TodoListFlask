@@ -39,9 +39,7 @@
             // Loop through each element using forEach and add event listener
             setDateButtons.forEach((item, index) => {
                 item.addEventListener('click', function() {
-                    count = index + 1
-                    datePickerId = "datePicker" + count
-                    const datePicker = document.getElementById(datePickerId);
+                    const datePicker = document.getElementById("date" + item.id);
                     const dateValue = datePicker.value;
                     if (dateValue) {
                         // Get the URL from the data attribute
@@ -49,6 +47,18 @@
                         // Redirect to the URL
                         window.location.href = url;
                     }
+                });
+            });
+
+            // Get all mark complete buttons in the list
+            const markCompleteButtons = document.querySelectorAll('#task-list li .markCompleteButton');
+
+            // Loop through each element using forEach and add event listener
+            markCompleteButtons.forEach((item, index) => {
+                item.addEventListener('click', function() {
+                    const url = this.getAttribute('data-url');
+                     // Redirect to the URL
+                    window.location.href = url;
                 });
             });
         });
@@ -60,13 +70,26 @@
         <input type="text" id="new-task" name="new-task" placeholder="Write your next task here..." required>
         <br><br>
         <ul id="task-list">
-            {% for item in todos.keys() %}
-            <li>{{ item }}
-                <button class="inline" id="{{loop.index}}" data-url="{{ url_for('delete', item=item) }}">Delete</button>
+            {% for item in uncompleted_todos %}
+            {% set itemid = item.uuid %}
+            <li>{{ item.name }}
+                <button class="inline" data-url="{{ url_for('delete', item=item.name) }}">Delete</button>
                 <p>Select a Due Date</p>
-                <input type="date" id="datePicker{{loop.index}}">
-                <button class="setDateButton" id="setDateBtn{{loop.index}}" data-url="{{ url_for('setdate', item=item) }}">Set Due Date</button>
-                <p id="selectedDate{{loop.index}}">{{todos[item]}}</p>
+                <input type="date" id="date{{itemid}}">
+                <button class="setDateButton" id={{itemid}} data-url="{{ url_for('setdate', item=item.name) }}">Set Due Date</button>
+                <p>{{ item.date }}</p>
+                <button class="markCompleteButton" data-url="{{ url_for('markcomplete', item=item.name) }}">Mark complete</button>
+            </li>
+            {% endfor %}
+            <p>Completed todos: </p>
+            {% for item in completed_todos %}
+            {% set completed_itemid = item.uuid %}
+            <li>{{ item.name }}
+                <button class="inline" data-url="{{ url_for('delete', item=item.name) }}">Delete</button>
+                <p>Select a Due Date</p>
+                <input type="date" id="date{{completed_itemid}}">
+                <button class="setDateButton" id={{completed_itemid}} data-url="{{ url_for('setdate', item=item.name) }}">Set Due Date</button>
+                <p>{{ item.date }}</p>
             </li>
             {% endfor %}
         </ul>
