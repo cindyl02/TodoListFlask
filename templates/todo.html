@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <style type="text/css">
+    body { font-size: 20px; }
+    .inline {
+        display: inline-block;
+        margin: 5px; /* Optional: add some margin for spacing */
+    }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css')}}"
+    />
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const form = document.querySelector('form');
+            form.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    form.submit();
+                }
+            });
+            // Select all delete buttons in the list
+            const deleteButtons = document.querySelectorAll('.inline');
+
+            // Loop through each element using forEach and add event listener
+            deleteButtons.forEach((item) => {
+                item.addEventListener('click', function() {
+                    // Get the URL from the data attribute
+                    const url = this.getAttribute('data-url');
+                    // Redirect to the URL
+                    window.location.href = url;
+                });
+
+            });
+
+            // Get all set date buttons in the list
+            const setDateButtons = document.querySelectorAll('#task-list li .setDateButton');
+
+            // Loop through each element using forEach and add event listener
+            setDateButtons.forEach((item, index) => {
+                item.addEventListener('click', function() {
+                    const datePicker = document.getElementById("date" + item.id);
+                    const dateValue = datePicker.value;
+                    if (dateValue) {
+                        // Get the URL from the data attribute
+                        const url = this.getAttribute('data-url') + "?date=" + dateValue;
+                        // Redirect to the URL
+                        window.location.href = url;
+                    }
+                });
+            });
+
+            // Get all mark complete buttons in the list
+            const markCompleteButtons = document.querySelectorAll('#task-list li .markCompleteButton');
+
+            // Loop through each element using forEach and add event listener
+            markCompleteButtons.forEach((item, index) => {
+                item.addEventListener('click', function() {
+                    const url = this.getAttribute('data-url');
+                     // Redirect to the URL
+                    window.location.href = url;
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="/">Todo List</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+          </li>
+          {% if not current_user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+          </li>
+          {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('logout') }}">Log Out</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <h1>{{title}}</h1>
+    <form action="/submit" method="post">
+        <input type="text" id="new-task" name="new-task" placeholder="Write your next task here..." required>
+        <br><br>
+        <ul id="task-list">
+            {% for item in uncompleted_todos %}
+            {% set itemid = item.uuid %}
+            <li>{{ item.name }}
+                <button class="inline" data-url="{{ url_for('delete', item=item.name) }}">Delete</button>
+                <p>Select a Due Date</p>
+                <input type="date" id="date{{itemid}}">
+                <button class="setDateButton" id={{itemid}} data-url="{{ url_for('setdate', item=item.name) }}">Set Due Date</button>
+                <p>{{ item.date }}</p>
+                <button class="markCompleteButton" data-url="{{ url_for('markcomplete', item=item.name) }}">Mark complete</button>
+            </li>
+            {% endfor %}
+            <p>Completed todos: </p>
+            {% for item in completed_todos %}
+            {% set completed_itemid = item.uuid %}
+            <li>{{ item.name }}
+                <button class="inline" data-url="{{ url_for('delete', item=item.name) }}">Delete</button>
+                <p>Select a Due Date</p>
+                <input type="date" id="date{{completed_itemid}}">
+                <button class="setDateButton" id={{completed_itemid}} data-url="{{ url_for('setdate', item=item.name) }}">Set Due Date</button>
+                <p>{{ item.date }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
